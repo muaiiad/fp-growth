@@ -1,5 +1,5 @@
 import pandas as pd
-raw = pd.read_excel("data/data.xlsx")
+raw = pd.read_excel("../data/data.xlsx")
 transactionTable = raw.values.tolist() # converting the data to a 2D list
 
 
