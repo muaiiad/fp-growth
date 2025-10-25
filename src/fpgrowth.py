@@ -25,22 +25,24 @@ minimumConfidence = 0.5
 # sort in-place by second element in tuple (frequency)
 frequent_items = [] # put the result here
 
-# TODO (Step 2): use frequent_items to re-arrange items in transactionTable (you can completely replace it if you want)
+# TODO (Step 2): use frequent_items to re-arrange items in transactionTable
+arrangedTable = [] # put the result here
 
-# TODO (Step 3): generate the tree based on transactionTable
+# TODO (Step 3): generate the tree based on arrangedTable
 root = FPNode(None, None, None) # this is the root, keep everything None except children
 frequent_nodes = {}
 # this hash will have a character as a key, and the value will be a list of all references to that character in the tree
 # we will use this because we traverse the tree starting from least frequent characters
 
 # TODO (Step 4): traverse the tree starting from least frequent characters (use frequent_items and frequent_nodes to find the starting nodes)
-# for each starting node, traverse the tree by going to the parent until you hit the root, then:
+# for each starting node, traverse the tree by going to the parent until you hit the root
 # generate the conditional trees (sets of the nodes in the path that leads up to that node) 
-# find the frequent patterns
+conditional_trees = []
 
+# TODO (Step 5): find the frequent patterns
 frequent_patterns = [] # put the result here
 
-# TODO (Step 5): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
+# TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
 #                   - For each subset:  
 #                       - Find the complementary subset and calculate association rules.  
 #                       - Extract strong rules based on the minimum confidence threshold.
