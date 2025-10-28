@@ -46,7 +46,6 @@ for item,count in item_count.items():
       frequent_items.append((item, support))
 
 frequent_items.sort(key=lambda x: x[1],reverse=True)
-print(frequent_items)
 
 # TODO (Step 2): use frequent_items to re-arrange items in transactionTable
 arrangedTable = [] # put the result here
@@ -56,7 +55,6 @@ for transaction in transactionTable:
     for pair in frequent_items:
         if pair[0] in transaction:
             sorted_items.append(pair[0])
-    print(sorted_items)
 
     if sorted_items:
         arrangedTable.append(sorted_items)
