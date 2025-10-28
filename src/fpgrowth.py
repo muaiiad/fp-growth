@@ -50,33 +50,18 @@ print(frequent_items)
 
 # TODO (Step 2): use frequent_items to re-arrange items in transactionTable
 arrangedTable = [] # put the result here
-item_order = {}
-index = 0
-for pair in frequent_items:
-    item_order[pair[0]] = index
-    index+=1
-
 for transaction in transactionTable:
 
-    filtered_items = []
-
-    for item in transaction:
-       if item in item_order:
-          filtered_items.append(item)
-
-
     sorted_items = []
-
     for pair in frequent_items:
-        item_name = pair[0]
-        if item_name in filtered_items:
-            sorted_items.append(item_name)
-
+        if pair[0] in transaction:
+            sorted_items.append(pair[0])
+    print(sorted_items)
 
     if sorted_items:
         arrangedTable.append(sorted_items)
 
-print(arrangedTable)
+
 # TODO (Step 3): generate the tree based on arrangedTable
 root = FPNode(None, None, None) # this is the root, keep everything None except children
 frequent_nodes = {}
