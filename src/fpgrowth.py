@@ -34,16 +34,16 @@ frequent_items = [] # put the result here
 item_count = Counter()
 
 for transaction in transactionTable:
-  unique_items = set(transaction)
-  for item in unique_items:
-    item_count[item] += 1
+    unique_items = set(transaction)
+    for item in unique_items:
+        item_count[item] += 1
 
 Num_Of_Transaction = len(transactionTable)
 
 for item,count in item_count.items():
     support = item_count[item]/Num_Of_Transaction
     if(support >= minimumSupport):
-      frequent_items.append((item, support))
+        frequent_items.append((item, support))
 
 frequent_items.sort(key=lambda x: x[1],reverse=True)
 
@@ -70,8 +70,20 @@ frequent_nodes = {}
 # for each starting node, traverse the tree by going to the parent until you hit the root
 # generate the conditional trees (sets of the nodes in the path that leads up to that node) 
 conditional_trees = []
+for item in reversed(frequent_items):
+    for node in frequent_nodes[item[0]]:
+        conditional = []
+        temp = node
+        frequency = node.count
+        while (temp is not root):
+            conditional.append(temp.item)
+            temp = temp.parent
+        for _ in range(0,frequency):
+            conditional_trees.append(conditional)
+        # if a node has a count > 1, that means that path exists multiple times, this is just a simple way of handling that
 
-# TODO (Step 5): find the frequent patterns
+# TODO (Step 5): find the frequent patterns from the conditional trees
+# note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
 frequent_patterns = [] # put the result here
 
 # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
