@@ -1,6 +1,11 @@
+import os
 import pandas as pd
 from collections import Counter
-raw = pd.read_excel("../data/data.xlsx")
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+data_path = os.path.join(script_dir, "../data/data.xlsx")
+
+raw = pd.read_excel(data_path)
 transactionTable = raw.values.tolist() # converting the data to a 2D list
 
 transactionTable = [ str(row[1]).split(',') for row in raw.values.tolist()]
@@ -71,6 +76,7 @@ for transaction in transactionTable:
     if sorted_items:
         arrangedTable.append(sorted_items)
 
+print(arrangedTable)
 # TODO (Step 3): generate the tree based on arrangedTable
 root = FPNode(None, None, None) # this is the root, keep everything None except children
 frequent_nodes = {}
