@@ -29,7 +29,8 @@ frequent_items = [] # put the result here
 item_count = Counter()
 
 for transaction in transactionTable:
-  for item in transaction:
+  unique_items = set(transaction)
+  for item in unique_items:
     item_count[item] += 1
 
 Num_Of_Transaction = len(transactionTable)
@@ -91,9 +92,3 @@ frequent_patterns = [] # put the result here
 #                   - Calculate lift for every strong rule
 
 strong_rules = [] # put the result here 
-
-
-
-    
-
-
