@@ -1,7 +1,9 @@
 import pandas as pd
+from collections import Counter
 raw = pd.read_excel("../data/data.xlsx")
 transactionTable = raw.values.tolist() # converting the data to a 2D list
 
+transactionTable = [ str(row[1]).split(',') for row in raw.values.tolist()]
 
 class FPNode: # change this class if necessary, idk how correct it is 
     def __init__(self, item, count, parent=None):
@@ -16,7 +18,7 @@ class FPNode: # change this class if necessary, idk how correct it is
         if child.item not in self.children:
             self.children[child.item] = child
         else:
-            self.children[child.item] += 1
+            self.children[child.item].count += 1
 
 minimumSupport = 0.5
 minimumConfidence = 0.5
@@ -24,6 +26,21 @@ minimumConfidence = 0.5
 # TODO (Step 1): extract the frequent items, put them in this list as tuples, first element represents character, second represents support
 # sort in-place by second element in tuple (frequency)
 frequent_items = [] # put the result here
+item_count = Counter()
+
+for transaction in transactionTable:
+  for item in transaction:
+    item_count[item] += 1
+
+Num_Of_Transaction = len(transactionTable)
+
+for item,count in item_count.items():
+    support = item_count[item]/Num_Of_Transaction
+    if(support >= minimumSupport):
+      frequent_items.append((item, support))
+
+frequent_items.sort(key=lambda x: x[1],reverse=True)
+print(frequent_items)
 
 # TODO (Step 2): use frequent_items to re-arrange items in transactionTable
 arrangedTable = [] # put the result here
