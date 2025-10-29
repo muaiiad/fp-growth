@@ -2,8 +2,10 @@ import os
 import pandas as pd
 from collections import Counter
 import itertools
+from itertools import combinations
 
 from pandas.core.common import not_none
+
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(script_dir, "../data/data.xlsx")
@@ -50,6 +52,7 @@ for item,count in item_count.items():
 
 frequent_items.sort(key=lambda x: (-x[1], x[0]))
 
+print("FREQUENT ITEM, SUPPORT\n===============================\n" + str(frequent_items) + "\n===============================")
 
 # TODO (Step 2): use frequent_items to re-arrange items in transactionTable
 arrangedTable = [] # put the result here
@@ -69,8 +72,6 @@ root = FPNode(None, None, None) # this is the root, keep everything None except 
 frequent_nodes = {}
 # this hash will have a character as a key, and the value will be a list of all references to that character in the tree
 # we will use this because we traverse the tree starting from least frequent characters
-
-
 for transaction in arrangedTable:
     current_node = root
     for item in transaction:
@@ -92,13 +93,6 @@ for transaction in arrangedTable:
 
         current_node = child_node
         
-# test fp tree 
-print(" FP-Tree successfully built")
-for item, nodes in frequent_nodes.items():
-    counts = [node.count for node in nodes]
-    print(f"{item}: {counts}")
-
-# all possible paths from each node to the root(dfs)
 
 all_paths = {}
 for item, nodes in frequent_nodes.items():
@@ -119,14 +113,16 @@ for item, nodes in frequent_nodes.items():
 # depth first  from leaves to root
 items_order = sorted(all_paths.keys(), key=lambda x: max(d for _, d in all_paths[x]), reverse=True)
 
-# print("\n All paths (leaf-first order based on depth):")
-# for item in items_order:
-#     print(f"\nItem '{item}':")
-    
-#     for i, (path, _) in enumerate(all_paths[item], start=1):
-        
-#         print(f"  Path #{i}: {' -> '.join(path)}")
 
+print("FP TREE\n===============================")
+for item in items_order:
+    print(f"Item '{item}':")
+    
+    for i, (path, _) in enumerate(all_paths[item], start=1):
+        
+        print(f"  Path #{i}: {' -> '.join(path)}")
+
+print("===============================")
 
 # TODO (Step 4): traverse the tree starting from least frequent characters (use frequent_items and frequent_nodes to find the starting nodes)
 # for each starting node, traverse the tree by going to the parent until you hit the root
@@ -146,7 +142,13 @@ for item in reversed(frequent_items):
         for _ in range(0,frequency):
             conditional_trees.append(conditional)
         # if a node has a count > 1, that means that path exists multiple times, this is just a simple way of handling that
-        
+
+print("CONDITIONAL BASE PATTERNS\n===============================")
+for lst in conditional_trees:
+    print(lst)
+print("===============================")
+
+
 # TODO (Step 5): find the frequent patterns from the conditional trees
 # note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
 frequent_patterns = [] # put the result here
@@ -181,7 +183,9 @@ for length in range(2, len(accepted_nodes) + 1):
     for combination in (itertools.combinations(accepted_nodes, length)):
         frequent_patterns.append(list(combination))
 
-
+print("FREQUENT PATTERNS\n===============================")
+print(frequent_patterns)
+print("===============================")
 
 
 # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
@@ -191,3 +195,34 @@ for length in range(2, len(accepted_nodes) + 1):
 #                   - Calculate lift for every strong rule
 
 strong_rules = [] # put the result here 
+for patteren in frequent_patterns:
+    items =set (patteren)
+for i in range (1,len(items)):
+    for subset in combinations (items,i):
+        subset=set(subset)
+        remain=items - subset
+        if not remain :
+            continue
+
+        support_both=sum(1 for t in transactionTable if items.issubset(t))/len(transactionTable)
+        support_left=sum(1 for t in transactionTable if subset.issubset(t))/len(transactionTable)
+        support_righ=sum(1 for t in transactionTable if remain.issubset(t))/len(transactionTable)
+        if support_left >0 and support_righ >0 :
+            confidence =support_both/support_left
+            lift =confidence/support_righ
+            if confidence>=minimumConfidence:
+                strong_rules.append(
+                    {
+                        'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3),'lift':round(lift,3)
+                    }
+                )
+
+print("STRONG RULES\n===============================")
+for rule in strong_rules :
+    print("Rule :", rule['Rule'])
+    print("Support :", rule['support'])
+    print("Confidence :", rule['confidence'])
+    print("Lift :", rule['lift'])
+    print("-------------------------")
+print("===============================")
+          
