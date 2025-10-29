@@ -71,6 +71,9 @@ frequent_nodes = {}
 # generate the conditional trees (sets of the nodes in the path that leads up to that node) 
 conditional_trees = []
 for item in reversed(frequent_items):
+    if (item[0] not in frequent_nodes):
+        print(item[0] + " not found in tree")
+        break
     for node in frequent_nodes[item[0]]:
         conditional = []
         temp = node
