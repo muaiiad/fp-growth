@@ -1,6 +1,9 @@
 import os
 import pandas as pd
 from collections import Counter
+import itertools
+
+from pandas.core.common import not_none
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 data_path = os.path.join(script_dir, "../data/data.xlsx")
@@ -88,6 +91,40 @@ for item in reversed(frequent_items):
 # TODO (Step 5): find the frequent patterns from the conditional trees
 # note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
 frequent_patterns = [] # put the result here
+last_node = conditional_trees[0][0]
+node_frequency = Counter()
+minimum_support_count = minimumSupport * len(transactionTable)
+
+for path in conditional_trees:
+
+    if (path[0] != last_node):
+        accepted_nodes = [last_node]
+        for key,value in node_frequency.items():
+            if value >= minimum_support_count:
+                accepted_nodes.append(key)
+
+        for length in range(2,len(accepted_nodes)+1):
+            for combination in (itertools.combinations(accepted_nodes,length)):
+                frequent_patterns.append(list(combination))
+
+        last_node = path[0]
+        node_frequency.clear()
+
+    for node in path[1:]:
+        node_frequency[node] += 1
+
+accepted_nodes = [last_node]
+for key,value in node_frequency.items():
+    if value >= minimum_support_count:
+        accepted_nodes.append(key)
+
+for length in range(2, len(accepted_nodes) + 1):
+    for combination in (itertools.combinations(accepted_nodes, length)):
+        frequent_patterns.append(list(combination))
+
+
+
+
 
 # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
 #                   - For each subset:  
