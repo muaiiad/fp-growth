@@ -48,7 +48,8 @@ for item,count in item_count.items():
     if(support >= minimumSupport):
         frequent_items.append((item, support))
 
-frequent_items.sort(key=lambda x: x[1],reverse=True)
+frequent_items.sort(key=lambda x: (-x[1], x[0]))
+
 
 # TODO (Step 2): use frequent_items to re-arrange items in transactionTable
 arrangedTable = [] # put the result here
@@ -69,6 +70,64 @@ frequent_nodes = {}
 # this hash will have a character as a key, and the value will be a list of all references to that character in the tree
 # we will use this because we traverse the tree starting from least frequent characters
 
+
+for transaction in arrangedTable:
+    current_node = root
+    for item in transaction:
+        if item in current_node.children:
+            child_node = current_node.children[item]
+            child_node.count += 1
+            
+        else:
+            child_node = FPNode(item, 1, current_node)
+            current_node.children[item] = child_node
+
+     
+        if item not in frequent_nodes:
+            frequent_nodes[item] = [child_node]
+            
+        else:
+            if all(existing_node is not child_node for existing_node in frequent_nodes[item]):
+                frequent_nodes[item].append(child_node)
+
+        current_node = child_node
+        
+# test fp tree 
+print(" FP-Tree successfully built")
+for item, nodes in frequent_nodes.items():
+    counts = [node.count for node in nodes]
+    print(f"{item}: {counts}")
+
+# all possible paths from each node to the root(dfs)
+
+all_paths = {}
+for item, nodes in frequent_nodes.items():
+    all_paths[item] = []
+    for node in nodes:
+        path = []
+        temp = node
+        depth = 0
+        
+        while temp.parent is not None:
+            
+            path.append(temp.item)
+            temp = temp.parent
+            depth += 1
+        path.reverse() 
+        all_paths[item].append((path, depth))
+
+# depth first  from leaves to root
+items_order = sorted(all_paths.keys(), key=lambda x: max(d for _, d in all_paths[x]), reverse=True)
+
+# print("\n All paths (leaf-first order based on depth):")
+# for item in items_order:
+#     print(f"\nItem '{item}':")
+    
+#     for i, (path, _) in enumerate(all_paths[item], start=1):
+        
+#         print(f"  Path #{i}: {' -> '.join(path)}")
+
+
 # TODO (Step 4): traverse the tree starting from least frequent characters (use frequent_items and frequent_nodes to find the starting nodes)
 # for each starting node, traverse the tree by going to the parent until you hit the root
 # generate the conditional trees (sets of the nodes in the path that leads up to that node) 
@@ -87,7 +146,7 @@ for item in reversed(frequent_items):
         for _ in range(0,frequency):
             conditional_trees.append(conditional)
         # if a node has a count > 1, that means that path exists multiple times, this is just a simple way of handling that
-
+        
 # TODO (Step 5): find the frequent patterns from the conditional trees
 # note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
 frequent_patterns = [] # put the result here
@@ -121,7 +180,6 @@ for key,value in node_frequency.items():
 for length in range(2, len(accepted_nodes) + 1):
     for combination in (itertools.combinations(accepted_nodes, length)):
         frequent_patterns.append(list(combination))
-
 
 
 
