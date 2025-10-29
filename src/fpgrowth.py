@@ -197,8 +197,10 @@ print("===============================")
 strong_rules = [] # put the result here 
 for patteren in frequent_patterns:
     items =set (patteren)
-for i in range (1,len(items)):
-    for subset in combinations (items,i):
+    if len(items)<2:
+        continue
+    for i in range (1,len(items)):
+     for subset in combinations (items,i):
         subset=set(subset)
         remain=items - subset
         if not remain :
@@ -208,17 +210,18 @@ for i in range (1,len(items)):
         support_left=sum(1 for t in transactionTable if subset.issubset(t))/len(transactionTable)
         support_righ=sum(1 for t in transactionTable if remain.issubset(t))/len(transactionTable)
         if support_left >0 and support_righ >0 :
-            confidence =support_both/support_left
-            lift =confidence/support_righ
-            if confidence>=minimumConfidence:
-                strong_rules.append(
-                    {
-                        'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3),'lift':round(lift,3)
-                    }
-                )
+         confidence =(support_both/support_left)
+         lift =confidence/support_righ
+         if confidence>=minimumConfidence and len(items)<=3:
+            strong_rules.append(
+                {
+                    'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
+                }
+            )
+unique_rules = {rule['Rule']: rule for rule in strong_rules}.values()
 
 print("STRONG RULES\n===============================")
-for rule in strong_rules :
+for rule in unique_rules :
     print("Rule :", rule['Rule'])
     print("Support :", rule['support'])
     print("Confidence :", rule['confidence'])
