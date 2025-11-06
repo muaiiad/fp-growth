@@ -30,8 +30,8 @@ class FPNode: # change this class if necessary, idk how correct it is
         else:
             self.children[child.item].count += 1
 
-minimumSupport = 0.5
-minimumConfidence = 0.5
+minimumSupport = 0.6
+minimumConfidence = 0.8
 
 # TODO (Step 1): extract the frequent items, put them in this list as tuples, first element represents character, second represents support
 # sort in-place by second element in tuple (frequency)
@@ -127,105 +127,107 @@ print("===============================")
 # TODO (Step 4): traverse the tree starting from least frequent characters (use frequent_items and frequent_nodes to find the starting nodes)
 # for each starting node, traverse the tree by going to the parent until you hit the root
 # generate the conditional trees (sets of the nodes in the path that leads up to that node) 
-conditional_trees = []
+conditional_trees = {}
 for item in reversed(frequent_items):
-    if (item[0] not in frequent_nodes):
-        print(item[0] + " not found in tree")
-        break
     for node in frequent_nodes[item[0]]:
-        conditional = []
-        temp = node
+        if (node is root):
+            continue
         frequency = node.count
+        temp = node.parent
+        conditional = []
         while (temp is not root):
             conditional.append(temp.item)
             temp = temp.parent
-        for _ in range(0,frequency):
-            conditional_trees.append(conditional)
-        # if a node has a count > 1, that means that path exists multiple times, this is just a simple way of handling that
+        if (node.item not in conditional_trees ):
+            conditional_trees[node.item] = []
+        conditional_trees[node.item].append((conditional,frequency))
 
 print("CONDITIONAL BASE PATTERNS\n===============================")
-for lst in conditional_trees:
-    print(lst)
+for key, paths in conditional_trees.items():
+    print(f"{key}:")
+    for path, freq in paths:
+        print(f"  {path}:{freq}")
 print("===============================")
 
+# we need to fix step 5 and step 6
 
 # TODO (Step 5): find the frequent patterns from the conditional trees
 # note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
-frequent_patterns = [] # put the result here
-last_node = conditional_trees[0][0]
-node_frequency = Counter()
-minimum_support_count = minimumSupport * len(transactionTable)
+# frequent_patterns = [] # put the result here
+# last_node = conditional_trees[0][0]
+# node_frequency = Counter()
+# minimum_support_count = minimumSupport * len(transactionTable)
 
-for path in conditional_trees:
+# for path in conditional_trees:
 
-    if (path[0] != last_node):
-        accepted_nodes = [last_node]
-        for key,value in node_frequency.items():
-            if value >= minimum_support_count:
-                accepted_nodes.append(key)
+#     if (path[0] != last_node):
+#         accepted_nodes = [last_node]
+#         for key,value in node_frequency.items():
+#             if value >= minimum_support_count:
+#                 accepted_nodes.append(key)
 
-        for length in range(2,len(accepted_nodes)+1):
-            for combination in (itertools.combinations(accepted_nodes,length)):
-                frequent_patterns.append(list(combination))
+#         for length in range(2,len(accepted_nodes)+1):
+#             for combination in (itertools.combinations(accepted_nodes,length)):
+#                 frequent_patterns.append(list(combination))
 
-        last_node = path[0]
-        node_frequency.clear()
+#         last_node = path[0]
+#         node_frequency.clear()
 
-    for node in path[1:]:
-        node_frequency[node] += 1
+#     for node in path[1:]:
+#         node_frequency[node] += 1
 
-accepted_nodes = [last_node]
-for key,value in node_frequency.items():
-    if value >= minimum_support_count:
-        accepted_nodes.append(key)
+# accepted_nodes = [last_node]
+# for key,value in node_frequency.items():
+#     if value >= minimum_support_count:
+#         accepted_nodes.append(key)
 
-for length in range(2, len(accepted_nodes) + 1):
-    for combination in (itertools.combinations(accepted_nodes, length)):
-        frequent_patterns.append(list(combination))
+# for length in range(2, len(accepted_nodes) + 1):
+#     for combination in (itertools.combinations(accepted_nodes, length)):
+#         frequent_patterns.append(list(combination))
 
-print("FREQUENT PATTERNS\n===============================")
-print(frequent_patterns)
-print("===============================")
+# print("FREQUENT PATTERNS\n===============================")
+# print(frequent_patterns)
+# print("===============================")
 
 
-# TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
-#                   - For each subset:  
-#                       - Find the complementary subset and calculate association rules.  
-#                       - Extract strong rules based on the minimum confidence threshold.
-#                   - Calculate lift for every strong rule
+# # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
+# #                   - For each subset:  
+# #                       - Find the complementary subset and calculate association rules.  
+# #                       - Extract strong rules based on the minimum confidence threshold.
+# #                   - Calculate lift for every strong rule
 
-strong_rules = [] # put the result here 
-for patteren in frequent_patterns:
-    items =set (patteren)
-    if len(items)<2:
-        continue
-    for i in range (1,len(items)):
-     for subset in combinations (items,i):
-        subset=set(subset)
-        remain=items - subset
-        if not remain :
-            continue
+# strong_rules = [] # put the result here 
+# for patteren in frequent_patterns:
+#     items =set (patteren)
+#     if len(items)<2:
+#         continue
+#     for i in range (1,len(items)):
+#      for subset in combinations (items,i):
+#         subset=set(subset)
+#         remain=items - subset
+#         if not remain :
+#             continue
 
-        support_both=sum(1 for t in transactionTable if items.issubset(t))/len(transactionTable)
-        support_left=sum(1 for t in transactionTable if subset.issubset(t))/len(transactionTable)
-        support_righ=sum(1 for t in transactionTable if remain.issubset(t))/len(transactionTable)
-        if support_left >0 and support_righ >0 :
-         confidence =(support_both/support_left)
-         lift =confidence/support_righ
-         if confidence>=minimumConfidence and len(items)<=3:
-            strong_rules.append(
-                {
-                    'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
-                }
-            )
-unique_rules = {rule['Rule']: rule for rule in strong_rules}.values()
+#         support_both=sum(1 for t in transactionTable if items.issubset(t))/len(transactionTable)
+#         support_left=sum(1 for t in transactionTable if subset.issubset(t))/len(transactionTable)
+#         support_righ=sum(1 for t in transactionTable if remain.issubset(t))/len(transactionTable)
+#         if support_left >0 and support_righ >0 :
+#          confidence =(support_both/support_left)
+#          lift =confidence/support_righ
+#          if confidence>=minimumConfidence and len(items)<=3:
+#             strong_rules.append(
+#                 {
+#                     'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
+#                 }
+#             )
+# unique_rules = {rule['Rule']: rule for rule in strong_rules}.values()
 
-print("STRONG RULES\n===============================")
-for rule in unique_rules :
-    print("Rule :", rule['Rule'])
-    print("Support :", rule['support'])
-    print("Confidence :", rule['confidence'])
-    print("Lift :", rule['lift'])
-    print("-------------------------")
-print("===============================")
+# print("STRONG RULES\n===============================")
+# for rule in unique_rules :
+#     print("Rule :", rule['Rule'])
+#     print("Support :", rule['support'])
+#     print("Confidence :", rule['confidence'])
+#     print("Lift :", rule['lift'])
+#     print("-------------------------")
+# print("===============================")
           
