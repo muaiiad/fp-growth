@@ -153,42 +153,30 @@ print("===============================")
 
 # TODO (Step 5): find the frequent patterns from the conditional trees
 # note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
-# frequent_patterns = [] # put the result here
-# last_node = conditional_trees[0][0]
-# node_frequency = Counter()
-# minimum_support_count = minimumSupport * len(transactionTable)
+frequent_patterns = []
+minimum_support_count = minimumSupport * len(transactionTable)
 
-# for path in conditional_trees:
+for key, paths in conditional_trees.items():
+    node_frequency = Counter()
+    accepted_nodes= [key]
 
-#     if (path[0] != last_node):
-#         accepted_nodes = [last_node]
-#         for key,value in node_frequency.items():
-#             if value >= minimum_support_count:
-#                 accepted_nodes.append(key)
+    for path, count in paths:
+        for node in path:
+            node_frequency[node] += count
 
-#         for length in range(2,len(accepted_nodes)+1):
-#             for combination in (itertools.combinations(accepted_nodes,length)):
-#                 frequent_patterns.append(list(combination))
+    for node, freq in node_frequency.items():
+        if freq >= minimum_support_count:
+            accepted_nodes.append(node)
 
-#         last_node = path[0]
-#         node_frequency.clear()
+    if(len(accepted_nodes) > 1):
+        for length in range(2, len(accepted_nodes) + 1):
+            for combination in (itertools.combinations(accepted_nodes, length)):
+                if list(combination) not in frequent_patterns:
+                    frequent_patterns.append(list(combination))
 
-#     for node in path[1:]:
-#         node_frequency[node] += 1
-
-# accepted_nodes = [last_node]
-# for key,value in node_frequency.items():
-#     if value >= minimum_support_count:
-#         accepted_nodes.append(key)
-
-# for length in range(2, len(accepted_nodes) + 1):
-#     for combination in (itertools.combinations(accepted_nodes, length)):
-#         frequent_patterns.append(list(combination))
-
-# print("FREQUENT PATTERNS\n===============================")
-# print(frequent_patterns)
-# print("===============================")
-
+print("FREQUENT PATTERNS\n===============================")
+print(frequent_patterns)
+print("===============================")
 
 # # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
 # #                   - For each subset:  
