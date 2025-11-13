@@ -8,7 +8,7 @@ from pandas.core.common import not_none
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(script_dir, "../data/data.xlsx")
+data_path = os.path.join(script_dir, "../data/test.xlsx")
 
 raw = pd.read_excel(data_path)
 transactionTable = raw.values.tolist() # converting the data to a 2D list
@@ -30,8 +30,8 @@ class FPNode: # change this class if necessary, idk how correct it is
         else:
             self.children[child.item].count += 1
 
-minimumSupport = 0.6
-minimumConfidence = 0.8
+minimumSupport = 0.3
+minimumConfidence = 0.5
 
 # TODO (Step 1): extract the frequent items, put them in this list as tuples, first element represents character, second represents support
 # sort in-place by second element in tuple (frequency)
@@ -178,44 +178,43 @@ print("FREQUENT PATTERNS\n===============================")
 print(frequent_patterns)
 print("===============================")
 
-# # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
-# #                   - For each subset:  
-# #                       - Find the complementary subset and calculate association rules.  
-# #                       - Extract strong rules based on the minimum confidence threshold.
-# #                   - Calculate lift for every strong rule
+# TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
+#                   - For each subset:  
+#                       - Find the complementary subset and calculate association rules.  
+#                       - Extract strong rules based on the minimum confidence threshold.
+#                   - Calculate lift for every strong rule
 
-# strong_rules = [] # put the result here 
-# for patteren in frequent_patterns:
-#     items =set (patteren)
-#     if len(items)<2:
-#         continue
-#     for i in range (1,len(items)):
-#      for subset in combinations (items,i):
-#         subset=set(subset)
-#         remain=items - subset
-#         if not remain :
-#             continue
+strong_rules = [] # put the result here 
+for patteren in frequent_patterns:
+    items =set (patteren)
+    if len(items)<2:
+        continue
+    for i in range (1,len(items)):
+     for subset in combinations (items,i):
+        subset=set(subset)
+        remain=items - subset
+        if not remain :
+            continue
 
-#         support_both=sum(1 for t in transactionTable if items.issubset(t))/len(transactionTable)
-#         support_left=sum(1 for t in transactionTable if subset.issubset(t))/len(transactionTable)
-#         support_righ=sum(1 for t in transactionTable if remain.issubset(t))/len(transactionTable)
-#         if support_left >0 and support_righ >0 :
-#          confidence =(support_both/support_left)
-#          lift =confidence/support_righ
-#          if confidence>=minimumConfidence and len(items)<=3:
-#             strong_rules.append(
-#                 {
-#                     'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
-#                 }
-#             )
-# unique_rules = {rule['Rule']: rule for rule in strong_rules}.values()
+        support_both=sum(1 for t in transactionTable if items.issubset(t))/len(transactionTable)
+        support_left=sum(1 for t in transactionTable if subset.issubset(t))/len(transactionTable)
+        support_righ=sum(1 for t in transactionTable if remain.issubset(t))/len(transactionTable)
+        if support_left >0 and support_righ >0 :
+         confidence =(support_both/support_left)
+         lift =confidence/support_righ
+         if confidence>=minimumConfidence and len(items)<=3:
+            strong_rules.append(
+                {
+                    'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
+                }
+            )
+unique_rules = {rule['Rule']: rule for rule in strong_rules}.values()
 
-# print("STRONG RULES\n===============================")
-# for rule in unique_rules :
-#     print("Rule :", rule['Rule'])
-#     print("Support :", rule['support'])
-#     print("Confidence :", rule['confidence'])
-#     print("Lift :", rule['lift'])
-#     print("-------------------------")
-# print("===============================")
-          
+print(f"{'RULE':40s} {'SUPPORT':10s} {'CONFIDENCE':12s} {'LIFT':10s}")
+print("-" * 75)
+
+for rule in unique_rules:
+    print(f"{str(rule['Rule']):40s} "
+          f"{rule['support']:<10} "
+          f"{rule['confidence']:<12} "
+          f"{rule['lift']:<10}")
