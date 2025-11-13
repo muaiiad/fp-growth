@@ -202,7 +202,7 @@ for patteren in frequent_patterns:
         if support_left >0 and support_righ >0 :
          confidence =(support_both/support_left)
          lift =confidence/support_righ
-         if confidence>=minimumConfidence and len(items)<=3:
+         if confidence>=minimumConfidence:
             strong_rules.append(
                 {
                     'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
