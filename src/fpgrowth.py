@@ -205,7 +205,7 @@ for key, paths in conditional_pattern_base.items():
 
 strong_rules = [] # put the result here
 for pattern in frequent_patterns:
-    items =set (pattern)
+    items =set (pattern[0])
     if len(items)<2:
         continue
     for i in range (1,len(items)):
