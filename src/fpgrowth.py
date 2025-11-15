@@ -2,13 +2,14 @@ import os
 import pandas as pd
 from collections import Counter
 import itertools
+import math
 from itertools import combinations
 
 from pandas.core.common import not_none
 
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
-data_path = os.path.join(script_dir, "../data/test.xlsx")
+data_path = os.path.join(script_dir, "../data/data.xlsx")
 
 raw = pd.read_excel(data_path)
 transactionTable = raw.values.tolist() # converting the data to a 2D list
@@ -30,8 +31,8 @@ class FPNode: # change this class if necessary, idk how correct it is
         else:
             self.children[child.item].count += 1
 
-minimumSupport = 0.3
-minimumConfidence = 0.5
+minimumSupport = 0.6
+minimumConfidence = 0.8
 
 # TODO (Step 1): extract the frequent items, put them in this list as tuples, first element represents character, second represents support
 # sort in-place by second element in tuple (frequency)
@@ -52,7 +53,7 @@ for item,count in item_count.items():
 
 frequent_items.sort(key=lambda x: (-x[1], x[0]))
 
-print("FREQUENT ITEM, SUPPORT\n===============================\n" + str(frequent_items) + "\n===============================")
+# print("FREQUENT ITEM, SUPPORT\n===============================\n" + str(frequent_items) + "\n===============================")
 
 # TODO (Step 2): use frequent_items to re-arrange items in transactionTable
 arrangedTable = [] # put the result here
@@ -95,9 +96,9 @@ for transaction in arrangedTable:
         
 
 all_paths = {}
-for item, node in frequent_nodes.items():
+for item, nodes in frequent_nodes.items():
     all_paths[item] = []
-    for node in node:
+    for node in nodes:
         path = []
         temp = node
         depth = 0
@@ -142,12 +143,12 @@ for item in reversed(frequent_items):
             conditional_pattern_base[node.item] = []
         conditional_pattern_base[node.item].append((conditional, frequency))
 
-print("CONDITIONAL BASE PATTERNS\n===============================")
-for key, paths in conditional_pattern_base.items():
-    print(f"{key}:")
-    for path, freq in paths:
-        print(f"  {path}:{freq}")
-print("===============================")
+# print("CONDITIONAL BASE PATTERNS\n===============================")
+# for key, paths in conditional_pattern_base.items():
+#     print(f"{key}:")
+#     for path, freq in paths:
+#         print(f"  {list(reversed(path))}:{freq}")
+# print("===============================")
 
 # we need to fix step 5 and step 6
 
@@ -155,7 +156,7 @@ print("===============================")
 # note that unlike in the lecture and lab examples, the given conditional trees INCLUDE the node itself, it'll always be the first element
 
 frequent_patterns = []
-minimum_support_count = int(minimumSupport * len(transactionTable))
+minimum_support_count = math.ceil(minimumSupport * len(transactionTable))
 
 for key, paths in conditional_pattern_base.items():
     accepted_patterns = []
@@ -163,19 +164,19 @@ for key, paths in conditional_pattern_base.items():
     frequent_patterns_set = set()
     node_frequency = Counter()
 
-    print(f"ITEM -> {key}:")
+    # print(f"ITEM -> {key}:")
 
     for path, count in paths:
         for node in path:
             node_frequency[node] += count
 
-    print(f"CONDITIONAL TREE:")
+    # print(f"CONDITIONAL TREE:")
 
     for node,freq in node_frequency.items():
         if freq >= minimum_support_count:
             accepted_patterns.append((node,freq))
             accepted_nodes.append (node)
-            print(f"{node} : {freq}")
+            # print(f"{node} : {freq}")
 
     for length in range(1, len(accepted_nodes)+1):
         for combination in combinations(accepted_nodes, length):
@@ -190,19 +191,20 @@ for key, paths in conditional_pattern_base.items():
             if possible_pattern_support >= minimum_support_count:
                 frequent_patterns_set.add((possible_pattern,possible_pattern_support))
 
-    print("FREQUENT PATTERNS:")
+    # print("FREQUENT PATTERNS:")
 
     for frequent_pattern, support in frequent_patterns_set:
-        print(f"{list(frequent_pattern)}:{support}")
+        # print(f"{list(frequent_pattern)}:{support}")
         frequent_patterns.append((list(frequent_pattern),support))
 
-    print("===============================")
+    # print("===============================")
 # TODO (Step 6): for each frequent pattern, generate all possible subsets, excluding the empty subset and the complete subset:  
 #                   - For each subset:  
 #                       - Find the complementary subset and calculate association rules.  
 #                       - Extract strong rules based on the minimum confidence threshold.
 #                   - Calculate lift for every strong rule
 
+rules = []
 strong_rules = [] # put the result here
 for pattern in frequent_patterns:
     items =set (pattern[0])
@@ -221,6 +223,11 @@ for pattern in frequent_patterns:
         if support_left >0 and support_right >0 :
          confidence =(support_both/support_left)
          lift = confidence / support_right
+         rules.append(
+                {
+                    'Rule':f"{list(subset)}->{list (remain)}",'support':round(support_both,3),'confidence':round(confidence,3)*100,'lift':round(lift,3)
+                }
+         )
          if confidence>=minimumConfidence:
             strong_rules.append(
                 {
@@ -228,6 +235,21 @@ for pattern in frequent_patterns:
                 }
             )
 unique_rules = {rule['Rule']: rule for rule in strong_rules}.values()
+all_rules = {rule['Rule']: rule for rule in rules}.values()
+
+print("ALL RULES:")
+
+print(f"{'RULE':40s} {'SUPPORT':10s} {'CONFIDENCE':12s} {'LIFT':10s}")
+print("-" * 75)
+
+for rule in all_rules:
+    print(f"{str(rule['Rule']):40s} "
+          f"{rule['support']:<10} "
+          f"{rule['confidence']:<12.2f} "
+          f"{rule['lift']:<10}")
+
+print("================================================")
+print("STRONG RULES:")
 
 print(f"{'RULE':40s} {'SUPPORT':10s} {'CONFIDENCE':12s} {'LIFT':10s}")
 print("-" * 75)
@@ -235,5 +257,5 @@ print("-" * 75)
 for rule in unique_rules:
     print(f"{str(rule['Rule']):40s} "
           f"{rule['support']:<10} "
-          f"{rule['confidence']:<12} "
+          f"{rule['confidence']:<12.2f} "
           f"{rule['lift']:<10}")
